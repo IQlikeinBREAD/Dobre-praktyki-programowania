@@ -1,6 +1,9 @@
 from typing import Union
 from fastapi import FastAPI
-from movie import Movie, load_movies
+from movie import  loadMovies
+from links import loadLinks
+from ratings import loadRatings
+from tags import loadTags
 
 app = FastAPI()
 
@@ -10,5 +13,20 @@ def read_root():
 
 @app.get("/movies")
 def get_movies():
-    movies = load_movies("data_base/movies.csv")
-    return [movie.__dict__ for movie in movies]
+    movies = loadMovies("data_base/movies.csv")
+    return movies
+
+@app.get("/links")
+def get_links():
+    links = loadLinks("data_base/links.csv")
+    return links
+
+@app.get("/ratings")
+def get_ratings():
+    ratings = loadRatings("data_base/ratings.csv")
+    return ratings
+
+@app.get("/tags")
+def get_tags():
+    tags = loadTags("data_base/tags.csv")
+    return tags

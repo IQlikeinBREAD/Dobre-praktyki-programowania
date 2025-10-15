@@ -7,7 +7,7 @@ class Movie:
         self.genres = genres
     
 
-def load_movies(filePath):
+def loadMovies(filePath):
     movies = []
     with open(filePath, newline='', encoding = 'utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
