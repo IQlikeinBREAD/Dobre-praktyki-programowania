@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import jwt
 import bcrypt
 from python_api.auth.authUtils import createToken, verifyToken, SECRET_KEY, ALGORITHM
-from python_api.users.usersDB import USERS_DB
 
 app = FastAPI()
 
@@ -64,6 +63,10 @@ def createUser(data: CreateUserData, db: Session = Depends(getDB), user_data: di
     token = createToken(username = newUser.username, roles=newUser.roles)
 
     return {"msg":"User succesfully created","access_token": token, "token_type": "bearer"}
+
+@app.get("/user_details")
+def getUserDetails(user_data: dict=Depends(verifyToken)):
+    return {"username": user_data.get("sub"), "roles": user_data.get("roles")}
     
 
 
@@ -79,18 +82,18 @@ def get_movies(db: Session = Depends(getDB), user_data: dict=Depends(verifyToken
 
 
 @app.get("/links")
-def get_links(db: Session = Depends(getDB)):
+def get_links(db: Session = Depends(getDB), user_data: dict=Depends(verifyToken)):
     links = db.query(Link).all()
     return links
 
 
 @app.get("/ratings")
-def get_ratings(db: Session = Depends(getDB)):
+def get_ratings(db: Session = Depends(getDB), user_data: dict=Depends(verifyToken)):
     ratings = db.query(Rating).all()
     return ratings
 
 
 @app.get("/tags")
-def get_tags(db: Session = Depends(getDB)):
+def get_tags(db: Session = Depends(getDB), user_data: dict=Depends(verifyToken)):
     tags = db.query(Tag).all()
     return tags
