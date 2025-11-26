@@ -8,7 +8,7 @@ client = TestClient(app)
 
 def setupModule(module):
     db = SessionLocal()
-    hashedPw = bcrypt.hashpw("adminpass".encode('utf-8'), bcrypt.gensalt())
+    hashedPw = bcrypt.hashpw("admin".encode('utf-8'), bcrypt.gensalt())
     adminUser = User(username="admin", hashed_password=hashedPw.decode('utf-8'), roles="ADMIN")
     db.add(adminUser)
     db.commit()
@@ -17,7 +17,7 @@ def setupModule(module):
 def testLoginSuccess():
     response = client.post("/login", json={
         "username": "admin", 
-        "password": "adminpass"
+        "password": "admin"
         })
     assert response.status_code == 200
     data = response.json()
@@ -25,7 +25,7 @@ def testLoginSuccess():
     assert data["token_type"] == "bearer"
 
 def testLoginFailure():
-    response = client.post("/login", json={"username": "admin", "password": "wrongpass"})
+    response = client.post("/login", json={"username": "admin", "password": "55"})
     assert response.status_code == 401
 
 def testCreateUserAdmin():
