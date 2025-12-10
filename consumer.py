@@ -1,47 +1,37 @@
 import time
+import sqlite3
 
 def process_tasks():
     while True:
-        task_found = False
-        task_index = -1
-        lines = []
-        try:
-            with open("tasks.txt","r") as file:
-                lines = file.readlines()
+        con = sqlite3.connect('tasks.db')
+        cur = con.cursor()
 
-            for index, line in enumerate(lines):
-                if 'pending' in line:
-                    task_index = index
-                    task_found = True
-        except FileNotFoundError:
-            print("Brak pliku tasks.txt")
-            time.sleep(5)
-            continue
-        
-        if task_found:
-            task_id, _ = lines[task_index].strip().split(',')
+        cur.execute("SELECT id FROM task WHERE status = 'pending' LIMIT 1")
+        result = cur.fetchone()
+
+        if result:
+            task_id = result[0]
+
+            cur.execute("UPDATE task SET status = 'in_progres' WHERE id = ?", (task_id,))
+            con.commit()
+            con.close()
+
             print(f"Pobrano zadanie: {task_id}")
+            print(f"Praca nad {task_id} trwa (30s)...")
 
-            lines[task_index] = f"{task_id},in_progress\n"
-
-            with open('tasks.txt','w') as file:
-                file.writelines(lines)
-
-            print(f"Praca nad {task_id} trwa...")
             time.sleep(30)
 
-            with open('tasks.txt','r') as file:
-                current_lines = file.readlines()
-            
-            current_lines[task_index] = f"{task_id},done\n"
-            
-            with open('tasks.txt','w') as file:
-                file.writelines(current_lines)
-            
-            print(f"Zadanie {task_id} wykonane.")
+            con = sqlite3.connect('tasks.db')
+            cur = con.cursor()
+            cur.execute("UPDATE task SET status = 'done' WHERE id = ?", (task_id,))
+            con.commit()
+            con.close()
 
+            print(f"Zadanie {task_id} wykonane.")
+        
         else:
-            print("Brak zadan. Czekam...")
+            con.close()
+            print("Brak zadań 'pending'. Czekam 5s...")
             time.sleep(5)
 
 if __name__ == "__main__":
